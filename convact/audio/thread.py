@@ -1,4 +1,5 @@
 import pyaudio
+import librosa
 import numpy as np
 
 from defaults import CHANNELS, RATE, CHUNK, BATCH
@@ -6,7 +7,7 @@ from defaults import CHANNELS, RATE, CHUNK, BATCH
 FORMAT = pyaudio.paInt16
 
 
-def audio_thread(queue):
+def audio_realtime_thread(queue):
     """
     Captures audio in batches and pushes it to a queue.
     """
@@ -48,3 +49,18 @@ def audio_thread(queue):
     stream.stop_stream()
     stream.close()
     audio.terminate()
+
+
+def chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
+
+def audio_prerecorded_thread(filename, queue):
+    # already had librosa as a dependency, might as well use it for file
+    # reading.
+    y, _ = librosa.load(filename, sr=RATE, dtype=np.float32)
+    # convert to a batch
+    for chunk in chunks(y, CHUNK * BATCH):
+        queue.put(chunk)

@@ -1,5 +1,5 @@
-from convact import ConvActions
-from events import CatEvent
+from events.core import ConvActions
+from events.events import CatEvent
 from audio.clean import clean_audio
 from audio.transcription import Transcription
 

@@ -1,38 +1,32 @@
-import multiprocessing as mp
 import click
-from audio.thread import audio_thread
-from core import work_thread, action_thread
+from commands.realtime import realtime as realtime_func
+from commands.prerecorded import prerecorded as prerecorded_func
+
 from defaults import DEFAULT_MODEL
 
 
+# Use a file for transcription, mainly for testing
 @click.command()
 @click.option('--model', default=DEFAULT_MODEL)
-def main(model):
-    transcription_queue = mp.Queue()
-    action_queue = mp.Queue()
-    audio = mp.Process(target=audio_thread, args=(transcription_queue, ))
-    audio.start()
+@click.argument('filename')
+def prerecorded(model, filename):
+    prerecorded_func(filename, model)
 
-    work = mp.Process(
-        target=work_thread,
-        args=(
-            'http://localhost:11434',
-            model,
-            transcription_queue,
-            action_queue
-        )
-    )
-    work.start()
 
-    action = mp.Process(
-        target=action_thread,
-        args=(action_queue, )
-    )
-    action.start()
+# Collect the transcription at runtime
+@click.command()
+@click.option('--model', default=DEFAULT_MODEL)
+def realtime(model):
+    realtime_func(model)
 
-    audio.join()
-    work.join()
-    action.join()
+
+@click.group()
+def main():
+    pass
+
+
+main.add_command(prerecorded)
+main.add_command(realtime)
 
 
 if __name__ == "__main__":

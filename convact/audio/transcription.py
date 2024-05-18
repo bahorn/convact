@@ -1,4 +1,3 @@
-import whisper
 from defaults import FILTER_PROB
 
 
@@ -9,6 +8,8 @@ class Transcription:
 
     def __init__(self, model_name='small.en', filter_prob=FILTER_PROB):
         self._filter_prob = filter_prob
+        # only import here to keep things running smoothly
+        import whisper
         self._model = whisper.load_model(model_name)
 
     def get_transcription(self, joined):
