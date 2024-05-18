@@ -1,9 +1,12 @@
 # ConvAct
 
-Listens to conversations, emitted events based on asking an LLM if the event is
-relevant.
+Listens to conversations, emitting events based on asking an LLM if the
+conversation is convering relevant things.
 
-Using ollama (with llama3) and whisper.
+Using ollama (with llama3) and whisper, with wake words deciding if a call to
+the LLM is needed.
+
+Not that great yet, need to improve how the audio is batched.
 
 ## Setup
 
@@ -21,10 +24,23 @@ ollama pull llama3
 ollama serve
 ```
 
+Then you can run the code from your virtualenv with the following to use a file:
 
-Then you can run the code from your virtualenv:
 ```
-python3 convact
+python3 convact prerecorded ./samples/config.json PATH_TO_FILE
 ```
 
-Only tested on MacOS, with python installed via homebrew.
+or the following to use your microphone:
+```
+python3 convact realtime ./samples/config.json
+```
+
+Both support `--model` and `--ollama` to set the model and ollama endpoint.
+
+Only tested on MacOS, on a M2 MacBook Air, with python installed via homebrew.
+Running everything locally.
+
+
+## License
+
+MIT
