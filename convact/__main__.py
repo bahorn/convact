@@ -1,6 +1,7 @@
 import multiprocessing as mp
 import click
-from core import audio_thread, work_thread, action_thread
+from audio.thread import audio_thread
+from core import work_thread, action_thread
 from defaults import DEFAULT_MODEL
 
 
