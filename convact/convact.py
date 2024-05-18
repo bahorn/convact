@@ -1,6 +1,7 @@
 from ollama import Client
 from llmoutput import map_llm_response_to_binary, normalize, BooleanResponse
 from transcript import RecentTranscript
+from defaults import DECAY_STEPS
 
 
 class Event:
@@ -19,7 +20,7 @@ class LLMAskEventEmitter:
     WAKEWORDS = []
     POSTFIX = "Answer with just a yes or a no, and NEVER elaborate."
 
-    def __init__(self, host, model, decay_steps=32):
+    def __init__(self, host, model, decay_steps=DECAY_STEPS):
         self._steps = 0
         self._decay_steps = decay_steps
         self._client = Client(host=host)

@@ -1,9 +1,12 @@
+from defaults import BUFFER_SIZE
+
+
 class RecentTranscript:
     """
     Manage a small transcript of the latest words.
     """
 
-    def __init__(self, buffer_size=16):
+    def __init__(self, buffer_size=BUFFER_SIZE):
         self._buffer = []
         self._buffer_size = buffer_size
 

@@ -5,7 +5,7 @@ from convact import ConvActions
 from events import CatEvent
 import librosa
 
-from defaults import CHANNELS, RATE, CHUNK, BATCH
+from defaults import CHANNELS, RATE, CHUNK, BATCH, FILTER_PROB
 
 FORMAT = pyaudio.paInt16
 
@@ -27,7 +27,7 @@ class Transcription:
     Wrapper around whisper to perform the transcription we need.
     """
 
-    def __init__(self, model_name='small.en', filter_prob=0.6):
+    def __init__(self, model_name='small.en', filter_prob=FILTER_PROB):
         self._filter_prob = filter_prob
         self._model = whisper.load_model(model_name)
 
