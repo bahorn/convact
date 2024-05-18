@@ -3,7 +3,7 @@ from audio.thread import audio_realtime_thread
 from core import work_thread, action_thread
 
 
-def realtime(model):
+def realtime(config, model, ollama_endpoint):
     transcription_queue = mp.Queue()
     action_queue = mp.Queue()
     audio = mp.Process(
@@ -15,8 +15,9 @@ def realtime(model):
     work = mp.Process(
         target=work_thread,
         args=(
-            'http://localhost:11434',
+            ollama_endpoint,
             model,
+            config['events'],
             transcription_queue,
             action_queue
         )

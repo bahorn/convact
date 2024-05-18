@@ -1,0 +1,18 @@
+{
+    "events": [
+        {
+            "name": "CatEvent",
+            "wakewords": ["cat", "cats"],
+            "queries": [
+                "Does the following mention a cats name?"
+            ]
+        },
+        {
+            "name": "HistoryEvent",
+            "wakewords": ["history", "historic"],
+            "queries": [
+                "Does the following mention a historic event?"
+            ]
+        }
+    ]
+}

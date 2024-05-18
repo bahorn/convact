@@ -9,7 +9,7 @@ class LLMAskEventEmitter:
     * If it is active based on the appearance of a wakeword.
     * Asking an LLM with a specific prompt with it applies to the transcript.
     """
-
+    NAME = None
     QUERIES = []
     WAKEWORDS = []
     POSTFIX = "Answer with just a yes or a no, and NEVER elaborate."
@@ -19,7 +19,11 @@ class LLMAskEventEmitter:
         self._decay_steps = decay_steps
         self._client = Client(host=host)
         self._model = model
-        self._name = self.__class__.__name__ if not name else name
+
+        if not self.NAME or name:
+            self._name = self.__class__.__name__ if not name else name
+        else:
+            self._name = self.NAME
 
     def wakewords(self, word):
         if normalize(word) in self.WAKEWORDS:
@@ -71,10 +75,10 @@ class LLMAskEventEmitter:
         return self.filter_events(res)
 
 
-class CatEvent(LLMAskEventEmitter):
-    QUERIES = ['Does the following mention a cats name?']
-    WAKEWORDS = ['cat', 'cats']
-
-
 def event_from_dict(event):
-    pass
+    class NewEvent(LLMAskEventEmitter):
+        QUERIES = event['queries']
+        WAKEWORDS = event['wakewords']
+        NAME = event['name']
+
+    return NewEvent

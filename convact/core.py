@@ -1,5 +1,5 @@
 from events.core import ConvActions
-from events.events import CatEvent
+from events.events import event_from_dict
 from audio.clean import clean_audio
 from audio.transcription import Transcription
 
@@ -16,14 +16,18 @@ class EventEmitter:
         self._queue.put((event, data))
 
 
-def work_thread(host, model, transcription_queue, action_queue):
+def work_thread(
+        host, model, emitter_classes, transcription_queue, action_queue):
     """
     Transcribes a audio it reads from a queue and processes it using the event
     emitters.
     """
 
     transcriber = Transcription()
-    emitters = [CatEvent(host, model)]
+    emitters = [
+        event_from_dict(emitter)(host, model)
+        for emitter in emitter_classes
+    ]
     event_emitter = EventEmitter(action_queue)
     ca = ConvActions(event_emitter, emitters)
 

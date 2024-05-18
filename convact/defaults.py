@@ -1,4 +1,5 @@
 DEFAULT_MODEL = 'llama3'
+DEFAULT_OLLAMA = 'http://localhost:11434'
 
 # audio stuff
 
