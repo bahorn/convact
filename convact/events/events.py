@@ -62,6 +62,7 @@ class LLMAskEventEmitter:
               ],
               options={
                   'temperature': 0.0,
+                  'num_predict': 3
               }
             )
             resp = response['message']['content']
