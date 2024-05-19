@@ -1,5 +1,5 @@
-from ollama import Client
-from llmoutput import map_llm_response_to_binary, normalize, BooleanResponse
+from llmoutput import normalize
+from pipelines.basic_llm_classifier import BasicLLMBooleanClassifer
 from defaults import DECAY_STEPS
 
 
@@ -12,13 +12,13 @@ class LLMAskEventEmitter:
     NAME = None
     QUERIES = []
     WAKEWORDS = []
-    POSTFIX = "Answer with just a yes or a no, and NEVER elaborate."
 
     def __init__(self, host, model, name=None, decay_steps=DECAY_STEPS):
         self._steps = 0
         self._decay_steps = decay_steps
-        self._client = Client(host=host)
-        self._model = model
+
+        self._classifier = BasicLLMBooleanClassifer(host, model)
+        self._classifier.train(self.QUERIES)
 
         if not self.NAME or name:
             self._name = self.__class__.__name__ if not name else name
@@ -38,10 +38,8 @@ class LLMAskEventEmitter:
     def decay(self):
         self._steps = self._steps - 1 if self._steps > 0 else 0
 
-    def event(self, idx, query, transcript):
+    def event(self, transcript):
         event = {
-            'query_idx': idx,
-            'query': query,
             'transcript': transcript
         }
         self._steps = 0
@@ -51,29 +49,10 @@ class LLMAskEventEmitter:
         return events
 
     def try_transcript(self, transcript):
-        res = []
+        if self._classifier.run(transcript):
+            return self.event(transcript)
 
-        for idx, query in enumerate(self.QUERIES):
-            response = self._client.chat(
-              model=self._model,
-              messages=[
-                {"role": "system", "content": query + self.POSTFIX},
-                {"role": "user", "content": transcript + '\n'}
-              ],
-              options={
-                  'temperature': 0.0,
-                  'num_predict': 3
-              }
-            )
-            resp = response['message']['content']
-
-            # print(transcript)
-            # print(resp)
-
-            if map_llm_response_to_binary(resp) == BooleanResponse.YES:
-                res.append(self.event(idx, query, transcript))
-
-        return self.filter_events(res)
+        return None
 
 
 def event_from_dict(event):

@@ -20,9 +20,9 @@ class ConvActions:
             emitter.decay()
 
             if emitter.active():
-                events = emitter.try_transcript(self._transcript.get())
-                for event, data in events:
-                    self._event_emitter.emit(event, data)
+                event = emitter.try_transcript(self._transcript.get())
+                if event:
+                    self._event_emitter.emit(event[0], event[1])
                     need_to_clear = True
 
         if need_to_clear:
