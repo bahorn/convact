@@ -10,8 +10,9 @@ class SummarizationLLMBooleanClassifer:
     POSTFIX = "Answer with just a yes or a no, and NEVER elaborate"
     # needs more gaslighting
     SUMMERIZE = "Summarize the following transcript so it can be used later"
-    SUMMERIZE += "for classification, do not say it can not be summerized, "
-    SUMMERIZE += "just try"
+    SUMMERIZE += "for classification, "
+    SUMMERIZE += "there may be errors, correct those if possible."
+    SUMMERIZE += "do not say it can not be summerized, just try"
 
     def __init__(self, host, model):
         self._queries = []

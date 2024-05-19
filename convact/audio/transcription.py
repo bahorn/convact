@@ -1,4 +1,4 @@
-from defaults import FILTER_PROB
+from defaults import FILTER_PROB, TRANSCRIPTION_MODEL
 
 
 class Transcription:
@@ -6,7 +6,8 @@ class Transcription:
     Wrapper around whisper to perform the transcription we need.
     """
 
-    def __init__(self, model_name='small.en', filter_prob=FILTER_PROB):
+    def __init__(self, model_name=TRANSCRIPTION_MODEL,
+                 filter_prob=FILTER_PROB):
         self._filter_prob = filter_prob
         # only import here to keep things running smoothly
         import whisper

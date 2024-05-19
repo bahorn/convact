@@ -1,6 +1,8 @@
 DEFAULT_MODEL = 'llama3'
 DEFAULT_OLLAMA = 'http://localhost:11434'
 
+TRANSCRIPTION_MODEL = 'base.en'
+
 # audio stuff
 
 CHANNELS = 1
