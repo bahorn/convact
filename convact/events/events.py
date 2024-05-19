@@ -1,5 +1,7 @@
 from llmoutput import normalize
-from pipelines.basic_llm_classifier import BasicLLMBooleanClassifer
+# from pipelines.basic_llm_classifier import BasicLLMBooleanClassifer
+from pipelines.summarization_llm_classifier import \
+        SummarizationLLMBooleanClassifer
 from defaults import DECAY_STEPS
 
 
@@ -17,7 +19,7 @@ class LLMAskEventEmitter:
         self._steps = 0
         self._decay_steps = decay_steps
 
-        self._classifier = BasicLLMBooleanClassifer(host, model)
+        self._classifier = SummarizationLLMBooleanClassifer(host, model)
         self._classifier.train(self.QUERIES)
 
         if not self.NAME or name:
@@ -44,9 +46,6 @@ class LLMAskEventEmitter:
         }
         self._steps = 0
         return (self._name, event)
-
-    def filter_events(self, events):
-        return events
 
     def try_transcript(self, transcript):
         if self._classifier.run(transcript):
