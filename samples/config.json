@@ -13,6 +13,13 @@
             "queries": [
                 "Does the following mention a historic event?"
             ]
+        },
+        {
+            "name": "DateEvent",
+            "wakewords": ["date", "calendar", "month", "year", "day"],
+            "queries": [
+                "Does the following mention a date?"
+            ]
         }
     ]
 }
