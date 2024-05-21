@@ -43,8 +43,6 @@ class TranscriptSummerizeAndForwardTask(Task):
                 return
 
             # generate a summary, then forward.
-            # todo: implement logic to stop this from forwarding if there is no
-            # new messages.
             summary = self._model.run(self._transcript.get())
             self._summaries.append(summary)
             self._summaries[-5:]
@@ -169,7 +167,6 @@ def start(config, model, ollama_endpoint, filename=None):
                 'to_forward': recognizer_list,
                 'host': ollama_endpoint,
                 'model': model
-
             }
         )
     )
