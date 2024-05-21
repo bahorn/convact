@@ -1,8 +1,6 @@
 import click
 import json
-from commands.realtime import realtime as realtime_func
-from commands.prerecorded import prerecorded as prerecorded_func
-
+from core import start
 from defaults import DEFAULT_MODEL, DEFAULT_OLLAMA
 
 
@@ -14,7 +12,7 @@ from defaults import DEFAULT_MODEL, DEFAULT_OLLAMA
 @click.argument('filename')
 def prerecorded(model, ollama, config, filename):
     with open(config) as f:
-        prerecorded_func(json.load(f), filename, model, ollama)
+        start(json.load(f), model, ollama, filename=filename)
 
 
 # Collect the transcription at runtime
@@ -24,7 +22,7 @@ def prerecorded(model, ollama, config, filename):
 @click.argument('config')
 def realtime(model, ollama, config):
     with open(config) as f:
-        realtime_func(json.load(f), model, ollama)
+        start(json.load(f), model, ollama, filename=None)
 
 
 @click.group()

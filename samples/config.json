@@ -1,5 +1,5 @@
 {
-    "events": [
+    "recognizers": [
         {
             "name": "CatEvent",
             "wakewords": ["cat", "cats"],
