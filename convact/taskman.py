@@ -7,6 +7,8 @@ Meant to make managing some applications a bit easier, allowing debugging, etc.
 Not really designed for high performance message passing, just passing some
 what regular messages.
 """
+import time
+import schedule
 from multiprocessing import Queue, Process
 
 
@@ -136,6 +138,9 @@ class TaskManager:
         """
         self._tasks.append(task)
 
+    def send_message(self, message: Message):
+        self._bus.send(message)
+
     def start(self, start_dest='start', start_data={}):
         running = []
         out_queue = self._bus.get_out_queue()
@@ -153,7 +158,7 @@ class TaskManager:
             running.append(p)
 
         # Need to send a start event to get the ball rolling
-        self._bus.send(Message(start_dest, start_data))
+        self.send_message(Message(start_dest, start_data))
 
         # now listen on the buses and pass messages between them.
         while True:
@@ -164,3 +169,33 @@ class TaskManager:
 
         for task in running:
             task.join()
+
+
+class SchedulerTask(Task):
+    """
+    Send messages based on a schedule.
+    """
+
+    def setup(self, data):
+        self._data = data['sched']
+
+    def send_message(self, message_name):
+        print('blah')
+        self.send(Message(message_name, {}))
+
+    def on_message(self, message: Message):
+        if message.name() != 'start':
+            return
+
+        s = schedule.Scheduler()
+        for task in self._data:
+            rep_time = task['time']
+            message_name = task['message_name']
+            s.every(rep_time).seconds.do(
+                self.send_message,
+                message_name=message_name
+            )
+
+        while True:
+            s.run_pending()
+            time.sleep(1)
