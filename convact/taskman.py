@@ -9,6 +9,7 @@ what regular messages.
 """
 import time
 import schedule
+from datetime import datetime
 from multiprocessing import Queue, Process
 
 
@@ -16,12 +17,16 @@ class Message:
     def __init__(self, name, data):
         self._name = name
         self._data = data
+        self._time = datetime.now()
 
     def name(self):
         return self._name
 
     def data(self):
         return self._data
+
+    def time(self):
+        return self._time
 
 
 class MessageBus:
@@ -57,6 +62,7 @@ class MessageBus:
         event = self._out_queue.get()
         if event.name() in self._forwarding_table:
             dest = self._forwarding_table[event.name()]
+            # print(f'event: {event.name()} -> {dest}')
             self._queue_mapping[dest].put(event)
         else:
             raise Exception('Event with no known destination')
@@ -180,11 +186,11 @@ class SchedulerTask(Task):
         self._data = data['sched']
 
     def send_message(self, message_name):
-        print('blah')
-        self.send(Message(message_name, {}))
+        msg = Message(message_name, {})
+        self.send(msg)
 
     def on_message(self, message: Message):
-        if message.name() != 'start':
+        if message.name() != 'start_sched':
             return
 
         s = schedule.Scheduler()

@@ -8,7 +8,7 @@ class BasicLLMBooleanClassifer:
     returning true
     """
 
-    POSTFIX = "Answer with just a yes or a no, and NEVER elaborate"
+    POSTFIX = "Answer with just a yes or a no, and NEVER elaborate."
 
     def __init__(self, host, model):
         self._queries = []
