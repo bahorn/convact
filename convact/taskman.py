@@ -8,9 +8,14 @@ Not really designed for high performance message passing, just passing some
 what regular messages.
 """
 import time
+import logging
 import schedule
 from datetime import datetime
 from multiprocessing import Queue, Process
+
+
+logger = logging.getLogger('taskman')
+logging.basicConfig(level=logging.INFO)
 
 
 class Message:
@@ -62,7 +67,7 @@ class MessageBus:
         event = self._out_queue.get()
         if event.name() in self._forwarding_table:
             dest = self._forwarding_table[event.name()]
-            # print(f'event: {event.name()} -> {dest}')
+            logger.info(f'event: {event.name()} -> {dest}')
             self._queue_mapping[dest].put(event)
         else:
             raise Exception('Event with no known destination')
@@ -127,6 +132,7 @@ def run_task(queue_pair: tuple[Queue, Queue],
     """
     Runs a task from the description.
     """
+    logging.info(f'Starting: {task_description.name()}')
     task = task_description.get_task()(
             task_description.name(), queue_pair, task_description.config()
         )

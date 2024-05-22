@@ -3,6 +3,9 @@ DEFAULT_OLLAMA = 'http://localhost:11434'
 
 TRANSCRIPTION_MODEL = 'base.en'
 
+MODEL_EMBEDDINGS = 'mxbai-embed-large'
+DEFAULT_THRESHOLD = 0.5
+
 # audio stuff
 
 CHANNELS = 1

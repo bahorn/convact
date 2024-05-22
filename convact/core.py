@@ -1,9 +1,11 @@
+import logging
 from datetime import datetime, timedelta
 from taskman import Task, Message, SchedulerTask
 from pipelines.basic_llm_classifier import BasicLLMBooleanClassifer
 from pipelines.summerization import SummerizationWithLLM
+from pipelines.embedding import Embedding
 from llmoutput import normalize
-from defaults import DEFAULT_OLLAMA, DEFAULT_MODEL
+from defaults import DEFAULT_OLLAMA, DEFAULT_MODEL, DEFAULT_THRESHOLD
 from taskman import TaskManager, TaskDescription
 from audio.thread import PrerecordedTask, RealtimeTask
 from transcription.task import TranscriptionTask
@@ -22,7 +24,7 @@ class TranscriptSummerizeAndForwardTask(Task):
         self._summaries = []
         self._to_forward = data['to_forward']
         self._model = SummerizationWithLLM(data['host'], data['model'])
-
+        self._embedding = Embedding()
         self._last_updated = datetime.fromtimestamp(0)
         self._last_forwarded = datetime.fromtimestamp(0)
 
@@ -35,7 +37,6 @@ class TranscriptSummerizeAndForwardTask(Task):
 
             self._last_updated = datetime.now()
 
-            print(new)
             return
 
         if message.name() == 'forward_summary':
@@ -44,11 +45,18 @@ class TranscriptSummerizeAndForwardTask(Task):
 
             # generate a summary, then forward.
             summary = self._model.run(self._transcript.get())
-            self._summaries.append(summary)
+            embedding = self._embedding.run(summary)
+            logging.info(f'Summary: {summary}')
+            self._summaries.append(
+                {'summary': summary, 'embedding': embedding}
+            )
             self._summaries[-5:]
             for dest in self._to_forward:
                 new_message = Message(
-                    dest, {'transcript': self._summaries[-1]}
+                    dest, {
+                        'transcript': self._summaries[-1]['summary'],
+                        'embedding': self._summaries[-1]['embedding']
+                    }
                 )
                 self.send(new_message)
 
@@ -57,6 +65,11 @@ class TranscriptSummerizeAndForwardTask(Task):
 
 
 class RecognizerTask(Task):
+    """
+    Computes the similarity of our description, if close enough asks an LLM
+    to decide if its close enough.
+    """
+
     def setup(self, data):
         host = data['host'] if 'host' in data else DEFAULT_OLLAMA
         model = data['model'] if 'model' in data else DEFAULT_MODEL
@@ -64,8 +77,13 @@ class RecognizerTask(Task):
         self._classifer = BasicLLMBooleanClassifer(host, model)
         self._classifer.train(data['queries'])
 
-        self._wakewords = set(normalize(word) for word in data['wakewords'])
+        self._embeddings = []
+        for query in data['queries']:
+            self._embeddings.append(Embedding().run(data['queries']))
+
         self._last_found = datetime.fromtimestamp(0)
+        self._threshold = data['theshold'] \
+            if 'threshold' in data else DEFAULT_THRESHOLD
 
     def on_message(self, message: Message):
         # cool off period
@@ -78,16 +96,23 @@ class RecognizerTask(Task):
 
         transcript = d['transcript']
 
-        # We use wake words to avoid calling the LLM too much.
         found = False
 
-        for word in transcript.split(' '):
-            w = normalize(word)
-            if w in self._wakewords:
+        for embedding in self._embeddings:
+            dist = Embedding().dist(embedding, d['embedding'])
+            print(dist)
+            if dist < self._threshold:
                 found = True
+                break
 
         if not found:
             return
+
+        data = {
+            'source': self._name,
+            'transcript': transcript
+        }
+        return self.send(Message('action', data))
 
         # Try and classify
         print('here', transcript)
@@ -145,7 +170,6 @@ def start(config, model, ollama_endpoint, filename=None):
         conf = {
             'model': model,
             'host': ollama_endpoint,
-            'wakewords': recognizer['wakewords'],
             'queries': recognizer['queries']
         }
         name = recognizer['name']

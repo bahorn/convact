@@ -2,24 +2,17 @@
     "recognizers": [
         {
             "name": "CatEvent",
-            "wakewords": ["cat", "cats"],
             "queries": [
-                "Does the following summary mention a cats name in any way?"
+                "My cats name is",
+                "I have a cat called"
             ]
         },
         {
-            "name": "HistoryEvent",
-            "wakewords": ["history", "historic"],
+            "name": "HelloEvent",
             "queries": [
-                "Does the following summary mention a historic event in any way?"
-            ]
-        },
-        {
-            "name": "DateEvent",
-            "wakewords": ["date", "calendar", "month", "year", "day"],
-            "queries": [
-                "Does the following summary mention a date in any way?"
+                "Hello World"
             ]
         }
+
     ]
 }
